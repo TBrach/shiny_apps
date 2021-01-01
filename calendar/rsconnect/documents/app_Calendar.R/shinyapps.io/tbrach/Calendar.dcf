@@ -1,0 +1,13 @@
+name: Calendar
+title: Calendar
+username:
+account: tbrach
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1248248
+bundleId: 3579413
+url: https://tbrach.shinyapps.io/Calendar/
+when: 1598955863.8398
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: 20180419_FaellesCorrection.R|Faelles.rds|TestApp_EspeciallyTZtroubles.R
