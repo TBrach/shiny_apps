@@ -1,9 +1,9 @@
 # - Load all required packages -
 library(shiny)
 library(lubridate)
-library(tidyverse)
 library(rdrop2)
 library(viridis)
+library(tidyverse)
 library(plotly)
 # --
 
