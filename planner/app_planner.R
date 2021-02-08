@@ -2,12 +2,10 @@
 library(shiny)
 library(shinyTime)
 library(lubridate)
-library(tidyr)
-library(dplyr)
 library(rdrop2)
-library(ggplot2)
 library(gridExtra)
 library(ggrepel)
+library(tidyverse)
 # --
 
 # - 20190926: To access your dropbox account this had to be done: -

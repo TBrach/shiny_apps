@@ -218,6 +218,7 @@ dayPlotMock <- function(plotDate, plotWidth = 10) {
 ## weekPlot ##
 ###############################
 
+
 weekPlot <- function(PlotDF, plotDate, plotWidth = 5) {
         
         # remember: PlotDF is already restricted to 1 Month plus 2 weeks, so no trouble with same week in different years
@@ -238,17 +239,18 @@ weekPlot <- function(PlotDF, plotDate, plotWidth = 5) {
                 DFkWeekPlot$dayLabel <- factor(DFkWeekPlot$dayLabel, levels = SurrounderDays, ordered = TRUE)
                 DFkWeekPlot$Width <- DFkWeekPlot$Width * plotWidth
                 DFkWeekPlot$startPosition <- DFkWeekPlot$startPosition * plotWidth 
-                DFkWeekPlot$Color <- factor(DFkWeekPlot$Color, levels = colorLevels, ordered = TRUE)
+                # DFkWeekPlot$Color <- factor(DFkWeekPlot$Color, levels = colorLevels, ordered = TRUE)
                 # add mock data.frame to mark the background of the plotDate day, see https://stackoverflow.com/questions/9847559/conditionally-change-panel-background-with-facet-grid
                 dayIndicatorDF <- data.frame(startPosition = 0, Hours = 0, shortName = "",
                                              weekLabel = DFkWeekPlot$weekLabel[1], dayLabel = paste(wday(plotDate, label = T), " ", format.Date(plotDate, "%d"), ".", format.Date(plotDate, "%m"), sep = ""))
+                dayIndicatorDF$dayLabel <- factor(dayIndicatorDF$dayLabel, levels = SurrounderDays, ordered = TRUE)
                 
                 Tr <- ggplot(DFkWeekPlot, aes(x = startPosition, y = Hours, label = shortName))
                 Tr <- Tr +
                         facet_grid(facets = weekLabel~dayLabel, drop = FALSE) +
-                        geom_rect(data = dayIndicatorDF, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, alpha = 0.3, fill = "#999999") +
-                        geom_rect(mapping=aes(fill = Color, xmin=startPosition, xmax=startPosition+Width, ymin=Hours, ymax=Hours+Duration/60), alpha=0.85) + 
-                        geom_text(vjust = 1, nudge_y = 0, hjust = -0.08, check_overlap = TRUE, col = "black", size = 3) +
+                        geom_rect(data = dayIndicatorDF, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, alpha = 0.3, fill = "lightgray") +
+                        geom_rect(mapping=aes(fill = Color, xmin=startPosition, xmax=startPosition+Width, ymin=Hours, ymax=Hours+Duration/60), alpha=1) + 
+                        geom_text(vjust = 1, nudge_y = 0, hjust = -0.08, check_overlap = TRUE, col = "white", size = 3) +
                         # geom_text_repel(nudge_y = 0, col = "black", size = 3, segment.size = NA, box.padding = 0, xlim = c(0, Inf)) +
                         scale_x_continuous(limits = c(0,plotWidth), breaks = c(), labels = c()) +
                         scale_y_reverse(limits = c(24, 0), breaks = seq(from = 22, to = 0, by = -2), expand = c(0,0)) +
@@ -272,6 +274,7 @@ weekPlot <- function(PlotDF, plotDate, plotWidth = 5) {
 ###############################
 ## weekPlotMock ##
 ###############################
+
 
 weekPlotMock <- function(plotDate, plotWidth = 5) {
         
