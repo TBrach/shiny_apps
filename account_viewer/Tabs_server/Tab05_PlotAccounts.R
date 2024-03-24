@@ -15,10 +15,9 @@ observeEvent(input$plot, {
                 
                 account_colors <- rv$account_colors
                 
-                if(isTRUE(input$restrictItem)){
-                        accountNames <- input$itemNames
-                        account_list <- account_list[names(account_list) %in% accountNames]
-                }
+                # only plot chosen accounts:
+                accountNames <- input$select_accounts
+                account_list <- account_list[names(account_list) %in% accountNames]
                 
                 if (length(account_list) == 0){
                         rv$infoText <- "No accounts selected, no plot possible"

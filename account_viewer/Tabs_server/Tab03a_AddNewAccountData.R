@@ -5,12 +5,12 @@ observeEvent(input$addCSV, {
         rv$Tra <- NULL
         rv$infoText <- NULL
         inFile <- input$addCSV
-        account <- input$tableAccount
+        account <- input$select_account_to_add
         account_list <- rv$account_list
         
         if (account == "IngDiba_Giro"){
                 # NB: fileEncoding: check with <http://osxdaily.com/2017/09/02/determine-file-encoding-mac-command-line/>
-                df <- read.csv(file = inFile$datapath, header = TRUE, skip = 14, stringsAsFactors = FALSE, sep = ";", fileEncoding="iso-8859-1")
+                df <- read.csv(file = inFile$datapath, header = TRUE, skip = 13, stringsAsFactors = FALSE, sep = ";", fileEncoding="iso-8859-1")
                 # NB: intentionally not read.csv2!
                 df$Text <- paste(df[[3]], df[[5]], sep = " - ")
                 df <- dplyr::select(df, Date = Buchung, Text, Amount = Betrag, Saldo = Saldo, Currency = 7)
@@ -39,7 +39,7 @@ observeEvent(input$addCSV, {
                 rm(df, dff, df_all, after, before)
         } else if (account == "IngDiba_Extra"){
                 # NB: fileEncoding: check with <http://osxdaily.com/2017/09/02/determine-file-encoding-mac-command-line/>
-                df <- read.csv(file = inFile$datapath, header = TRUE, skip = 14, stringsAsFactors = FALSE, sep = ";", fileEncoding="iso-8859-1")
+                df <- read.csv(file = inFile$datapath, header = TRUE, skip = 13, stringsAsFactors = FALSE, sep = ";", fileEncoding="iso-8859-1")
                 # NB: intentionally not read.csv2
                 df$Text <- paste(df[[3]], df[[4]], df[[5]], sep = " - ")
                 df <- dplyr::select(df, Date = Buchung, Text, Amount = Betrag, Saldo = Saldo, Currency = 7)
@@ -93,17 +93,18 @@ observeEvent(input$addCSV, {
                 rv$account_list <- account_list
                 rv$infoText <- paste0("added ", after - before, " entries to IngDiba_Depot")
                 rm(df, dff, df_all, after, before)
-        } else if (account == "Handelsbanken_Faelles"){
-                df <- read.csv2(file = inFile$datapath, header = FALSE, stringsAsFactors = FALSE, sep = ";", fileEncoding="iso-8859-1")
+        } else if (account == "Handelsbanken_Faelles" || account == "Handelsbanken_Loen"){
+                # df <- read.csv2(file = inFile$datapath, header = FALSE, stringsAsFactors = FALSE, sep = ";", fileEncoding="iso-8859-1")
+                df <- read_csv2(file = inFile$datapath, col_names = TRUE, show_col_types = FALSE)
                 df <- df[,1:4]
                 colnames(df) <- c("Date", "Text", "Amount", "Saldo")
                 df$Currency <- "DKK"
                 df$Date <- lubridate::parse_date_time(df$Date, orders = "dmy", tz = "CET")
-                df$Account <- "Handelsbanken_Faelles"
+                df$Account <- account
                 if (df$Date[1] > df$Date[nrow(df)]) {
                         df <- df[nrow(df):1,] # make sure oldest is on top for following Amount check
                 }
-                dff <- account_list[["Handelsbanken_Faelles"]]
+                dff <- account_list[[account]]
                 before <- nrow(dff)
                 df_all <- rbind(dff, df)
                 df_all <- df_all[!duplicated(df_all[-2]),] # because of the Danish later issue that I had when not using fileEncoding
@@ -111,10 +112,10 @@ observeEvent(input$addCSV, {
                         rv$infoText <- "Problem that Saldo doesn't really fit to Amount, check!"
                         return()
                 }
-                account_list[["Handelsbanken_Faelles"]] <- df_all
+                account_list[[account]] <- df_all
                 after <- nrow(df_all)
                 rv$account_list <- account_list
-                rv$infoText <- paste0("added ", after - before, " entries to Handelsbanken_Faelles")
+                rv$infoText <- paste0("added ", after - before, " entries to ", account)
                 
         } else if (account == "BasisBank_Loen") {
                 df <- read.csv2(file = inFile$datapath, header = FALSE, stringsAsFactors = FALSE, sep = ";", fileEncoding="utf-8")

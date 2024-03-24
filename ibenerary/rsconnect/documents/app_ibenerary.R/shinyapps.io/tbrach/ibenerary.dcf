@@ -1,0 +1,14 @@
+name: ibenerary
+title: ibenerary
+username:
+account: tbrach
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6962742
+bundleId: 6284584
+url: https://tbrach.shinyapps.io/ibenerary/
+when: 1662716923.55961
+lastSyncTime: 1662716923.55962
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .httr-oauth|20200209_SolvePlotProblem.R|20200328_SriLanka.rds|OldFiles/_a_ppOld.R

@@ -1,0 +1,13 @@
+name: planner
+title: planner
+username:
+account: tbrach
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3438612
+bundleId: 4049986
+url: https://tbrach.shinyapps.io/planner/
+when: 1609573568.03655
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: Planner.rds

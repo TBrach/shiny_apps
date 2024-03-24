@@ -16,9 +16,9 @@ observeEvent(input$plot, {
                 DFkPlot <- rv$DFk
                 
                 # - restrict DFkPlot to entries that overlap with the month of the plotDate plus 1 week on each side -
-                plotMonth <- interval(start = update(plotDate(), day = 1) - weeks(1), 
-                                      end = update(plotDate(), day = 1) + months(1) + weeks(1)) 
-                DFkPlot <- DFkPlot[int_overlaps(interval(start = DFkPlot$startTime, end = DFkPlot$endTime), plotMonth),, drop = FALSE]
+                plotMonth <- lubridate::interval(start = stats::update(plotDate(), day = 1) - lubridate::weeks(1), 
+                                      end = stats::update(plotDate(), day = 1) + base::months(1) + lubridate::weeks(1)) 
+                DFkPlot <- DFkPlot %>% filter(lubridate::int_overlaps(lubridate::interval(start = startTime, end = endTime), plotMonth))
                 # --
                 
                 if (dim(DFkPlot)[1] == 0) {
@@ -49,7 +49,7 @@ observeEvent(input$plot, {
                         # --
                         
                         # - determine position and width of each element using positionAndWidthAssigner()
-                        DFkPlot <- positionAndWidthAssigner(DFkPlot)
+                        DFkPlot <- positionAndWidthAssigner(PlotDF = DFkPlot)
                         # --
                         
                         # - generate day plots -

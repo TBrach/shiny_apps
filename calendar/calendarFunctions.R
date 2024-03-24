@@ -1,7 +1,7 @@
 # Set the colors!:
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-colorLevels <- c("Faelles", "Iben", "Thorsten", "Maise", "Other")
-colorValues <- c(Faelles = cbPalette[4], Iben = cbPalette[7], Thorsten = cbPalette[2], Maise = "#dccaec", Other = cbPalette[6]) # "#006633"
+colorLevels <- c("Faelles", "Iben", "Thorsten", "Maise", "Learn", "Diary", "Maise_diary", "Thorsten_syg", "Iben_syg", "Maise_syg", "Other")
+colorValues <- c(Faelles = cbPalette[4], Iben = cbPalette[7], Thorsten = cbPalette[2], Maise = "#dccaec", Learn = "#5DC863FF", Diary = cbPalette[5], Maise_diary =  "#E32524", Thorsten_syg = "#A1527F", Iben_syg = "#56B4E9", Maise_syg = "#BCE1FF", Other = cbPalette[6]) # "#006633"
 
 # - make a ggplot version of pal -
 pal_ggplot <- function(col){
@@ -26,27 +26,32 @@ pal_ggplot <- function(col){
 ###############################
 
 splitMultidayEntries <- function(PlotDF){
-        
-        Indexes <- which(PlotDF$endDate > PlotDF$startDate)
-        DFAll <- data.frame()
-        for(i in Indexes){
-                multiDayEntry <- PlotDF[i,]
-                # Dates <- seq.Date(as.Date(multiDayEntry$startDate), as.Date(multiDayEntry$endDate), by = "day") # gave tz problems, always changing to UTC therefore replaced by
-                Dates <- seq(ymd(multiDayEntry$startDate, tz = "CET"), ymd(multiDayEntry$endDate, tz = "CET"), by = 'days')
-                DF <- multiDayEntry[rep(1, length(Dates)),]
-                DF$startDate <- Dates
-                DF$endDate[1:(nrow(DF)-1)] <- Dates[1:(nrow(DF)-1)]+days(1)
-                DF$startTime[2:nrow(DF)] <- update(DF$startDate[2:nrow(DF)], hour = 0, minute = 0)
-                DF$endTime[1:(nrow(DF)-1)] <- update(DF$endDate[1:(nrow(DF)-1)], hour = 0, minute = 0)
-                DF$Duration <- as.numeric(as.duration(DF$endTime-DF$startTime), "minutes")
-                # kill if Duration is 0 here!! NOT IN YET
-                #.e.g. DF <- DF[DF$Duration!=0,]
-                DFAll <- rbind(DFAll, DF)
-        }
-        PlotDF <- rbind(PlotDF, DFAll)
-        PlotDF <- PlotDF[-Indexes,]
-        # PlotDF <- dplyr::arrange(PlotDF, startTime, Name, Urgency)
-        PlotDF <- dplyr::arrange(PlotDF, startTime, Name, Color)
+  
+  Indexes <- which(PlotDF$endDate > PlotDF$startDate)
+  PlotDF$original_startTime <- PlotDF$startTime
+  Plot_DF_index_update <- lapply(Indexes, function(i){
+    multiDayEntry <- PlotDF[i,]
+    Dates <- seq.Date(lubridate::date(multiDayEntry$startDate), lubridate::date(multiDayEntry$endDate), by = "day")
+    # Dates <- seq(ymd(multiDayEntry$startDate, tz = "CET"), ymd(multiDayEntry$endDate, tz = "CET"), by = 'days')
+    DF <- multiDayEntry[rep(1, length(Dates)),]
+    DF$startDate <- lubridate::parse_date_time(Dates, orders = "ymd", tz = "CET")
+    DF$endDate[1:(nrow(DF)-1)] <- lubridate::parse_date_time(Dates[1:(nrow(DF)-1)]+days(1), orders = "ymd", tz = "CET")   
+    DF$startTime[2:nrow(DF)] <- update(DF$startDate[2:nrow(DF)], hour = 0, minute = 0)
+    DF$endTime[1:(nrow(DF)-1)] <- update(DF$endDate[1:(nrow(DF)-1)], hour = 0, minute = 0)
+    # Change tz to UTC for duration calculation to avoid daylight saving troubles
+    tz(DF$startTime) <- "UTC"
+    tz(DF$endTime) <- "UTC"
+    DF$Duration <- as.numeric(lubridate::as.duration(DF$endTime-DF$startTime), "minutes")
+    # and back
+    tz(DF$startTime) <- "CET"
+    tz(DF$endTime) <- "CET"
+    DF
+  }) %>% bind_rows()
+  
+  PlotDF <- bind_rows(PlotDF, Plot_DF_index_update)
+  PlotDF <- PlotDF[-Indexes,]
+  PlotDF <- dplyr::arrange(PlotDF, startTime, original_startTime, Name, Color)
+  dplyr::select(PlotDF, -original_startTime)
 }
 
 
@@ -58,21 +63,22 @@ splitMultidayEntries <- function(PlotDF){
 # NB: function should only be called when PlotDF has at least one entry!
 blockFinder <- function(PlotDF){
         if(nrow(PlotDF) > 1){
+                rownames(PlotDF) <- NULL
                 DFkBloFind <- data.frame(Time = c(PlotDF$startTime, PlotDF$endTime), Type = c(rep("S", nrow(PlotDF)), rep("E", nrow(PlotDF))), Id = as.integer(rep(rownames(PlotDF),2))) #NB: changes the tz to CEST!!
                 #NB: In the following it is important that in case of equal time between an ending and starting event, the ending event comes first, therefore Type is included in the order
-                DFkBloFind <- DFkBloFind[order(DFkBloFind$Time, DFkBloFind$Type),]
+                DFkBloFind <- DFkBloFind %>% arrange(Time, Type, Id) # DFkBloFind[order(DFkBloFind$Time, DFkBloFind$Type),]
                 DFkBloFind$Adds <- DFkBloFind$Id
                 DFkBloFind$Adds[DFkBloFind$Type == "E"] <- -1*DFkBloFind$Adds[DFkBloFind$Type == "E"]
                 DFkBloFind$cumSumAdds <- cumsum(DFkBloFind$Adds)
                 # every time there is a zero a block ends
-                DFkBloFind <- DFkBloFind[DFkBloFind$Type == "E",]
+                DFkBloFind <- DFkBloFind %>% dplyr::filter(Type == "E")
                 # constructing a vector where you add 1 after each 0 in DFkBloFind$cumSumAdds
                 DFkBloFind$BlockNo <- cumsum(c(1, DFkBloFind$cumSumAdds[1:(nrow(DFkBloFind)-1)]) == 0)
                 rleV <- rle(DFkBloFind$BlockNo)
                 DFkBloFind$BlockSizes <- rep(rleV$lengths, rleV$lengths)
                 DFkBloFind$BlockId <- 0
                 DFkBloFind$BlockId[DFkBloFind$BlockSizes != 1] <- rep(order(unique(DFkBloFind$BlockNo[DFkBloFind$BlockSizes != 1])), times = rle(DFkBloFind$BlockNo[DFkBloFind$BlockSizes != 1])[[1]])
-                
+                DFkBloFind <- DFkBloFind %>% arrange(Id)
                 PlotDF$blockId <- DFkBloFind$BlockId
                 # PlotDF$blockSize <- DFkBloFind$BlockSizes # probably not needed
         } else {
@@ -99,9 +105,11 @@ positionAndWidthAssigner <- function(PlotDF){
                 for(BloId in unique(PlotDF$blockId[PlotDF$blockId>0])){
                         #BloId <- 1
                         # Pick the Block and order Starts and Ends of events
-                        DFkBlock <- PlotDF[PlotDF$blockId == BloId,]
-                        DFkBlock <- data.frame(Time = c(DFkBlock$startTime, DFkBlock$endTime), Type = c(rep("S", nrow(DFkBlock)), rep("E", nrow(DFkBlock))), Id = as.integer(rep(rownames(DFkBlock),2)))
-                        DFkBlock <- DFkBlock[order(DFkBlock$Time, DFkBlock$Type),]
+                        DFkBlock <- PlotDF %>% rownames_to_column("row_id") %>% dplyr::filter(blockId == BloId)
+                        
+                        DFkBlock <- data.frame(Time = c(DFkBlock$startTime, DFkBlock$endTime), Type = c(rep("S", nrow(DFkBlock)), rep("E", nrow(DFkBlock))), Id = (rep(DFkBlock$row_id, 2)))
+                        # DFkBlock <- DFkBlock[order(DFkBlock$Time, DFkBlock$Type),]
+                        DFkBlock <- DFkBlock %>% arrange(Time, Type, Id)
                         # = assign to each entry the slot and thus also find the total number of slots needed for the block =
                         DFkBlock$Slot <- 0
                         DFkBlock$Slot[1] <- 1
@@ -123,6 +131,7 @@ positionAndWidthAssigner <- function(PlotDF){
                         rm(i)
                         # ==
                         # = then find for each entry the right hand neighbor =
+                        # Can you write the idea here?? 
                         DFkBlock$Neighbor <- max(DFkBlock$Slot)+1 # makes it easy to calculate the width of the events later
                         for(i in unique(DFkBlock$Slot)){
                                 Indexes <- which(DFkBlock$Slot == i) # NB: always an even number of indixes
@@ -136,8 +145,8 @@ positionAndWidthAssigner <- function(PlotDF){
                         # ==
                         # == calculate startPosition and Width and put them into PlotDF ==
                         DFkBlock <- DFkBlock[DFkBlock$Type == "S",]
-                        PlotDF$startPosition[as.numeric(rownames(PlotDF)) %in% DFkBlock$Id] <- (DFkBlock$Slot-1)/max(DFkBlock$Slot)
-                        PlotDF$Width[as.numeric(rownames(PlotDF)) %in% DFkBlock$Id] <- (DFkBlock$Neighbor-DFkBlock$Slot)/max(DFkBlock$Slot)
+                        PlotDF$startPosition[match(DFkBlock$Id, rownames(PlotDF))] <- (DFkBlock$Slot-1)/max(DFkBlock$Slot)
+                        PlotDF$Width[match(DFkBlock$Id, rownames(PlotDF))] <- (DFkBlock$Neighbor-DFkBlock$Slot)/max(DFkBlock$Slot)
                 }
         }
         PlotDF
@@ -250,7 +259,7 @@ weekPlot <- function(PlotDF, plotDate, plotWidth = 5) {
                         facet_grid(facets = weekLabel~dayLabel, drop = FALSE) +
                         geom_rect(data = dayIndicatorDF, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, alpha = 0.3, fill = "lightgray") +
                         geom_rect(mapping=aes(fill = Color, xmin=startPosition, xmax=startPosition+Width, ymin=Hours, ymax=Hours+Duration/60), alpha=1) + 
-                        geom_text(vjust = 1, nudge_y = 0, hjust = -0.08, check_overlap = TRUE, col = "white", size = 3) +
+                        geom_text(vjust = 1, nudge_y = 0, hjust = -0.08, check_overlap = TRUE, col = "black", size = 3) +
                         # geom_text_repel(nudge_y = 0, col = "black", size = 3, segment.size = NA, box.padding = 0, xlim = c(0, Inf)) +
                         scale_x_continuous(limits = c(0,plotWidth), breaks = c(), labels = c()) +
                         scale_y_reverse(limits = c(24, 0), breaks = seq(from = 22, to = 0, by = -2), expand = c(0,0)) +
@@ -360,6 +369,7 @@ monthPlot <- function(PlotDF, plotDate, plotWidth = 5){
                 dayIndicatorDF <- data.frame(startPosition = 0, Hours = 0, shortName = "",
                                              Wday = wday(plotDate, label = T),
                                              weekLabel = paste("W ", monthWeeks[match(strftime(plotDate, format = "%V", tz = "CET"), monthWeeks)], sep = ""))
+                dayIndicatorDF$Wday <- factor(dayIndicatorDF$Wday, levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"), ordered = T)
                 
                 Tr <- ggplot(DFkMonthPlot, aes(x = startPosition, y = Hours, label = shortName))
                 Tr <- Tr +

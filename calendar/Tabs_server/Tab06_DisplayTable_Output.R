@@ -3,8 +3,11 @@ output$calendarTable <- renderTable({
         if(!is.null(rv$DFk)){
                 DFkShow <- cbind(No = 1:nrow(rv$DFk), rv$DFk)
                 
+                if(isTRUE(input$diary_search)){
+                  DFkShow <- dplyr::filter(DFkShow, Color == "Diary")
+                }
                 if(isTRUE(input$search)){
-                        DFkShow <- DFkShow[grep(pattern = input$wordsearch, DFkShow$Name),] 
+                        DFkShow <- dplyr::filter(DFkShow, str_detect(Name, input$wordsearch) | str_detect(Comment, input$wordsearch)) #DFkShow[grep(pattern = input$wordsearch, DFkShow$Name),] 
                         
                 }
                 

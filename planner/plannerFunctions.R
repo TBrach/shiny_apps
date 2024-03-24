@@ -8,10 +8,12 @@ QuantColors15 <- tol15rainbow[c(1, 12, 4, 7, 13, 2, 11, 5, 8, 14, 3, 10, 6, 9, 1
 #                  Sport_Motion = "#7F00FF", Meditation = QuantColors15[4], Braintable = "#0f4c81", Gefuehlsschule = "#FDE725FF", 
 #                  Social = "#FF7F50", Household = "#21908CFF", diary = "#9FDA3AFF")
 
-colorLevels <- c("Other","Affoering", "Deep", "Work", "Learn_Create", "Sport_Motion", "Meditation", "Braintable", "Gefuehlsschule", "Social", "Household", "diary")
+
 colorValues <- c(Other = cbPalette[1], Affoering = "#dccaec", Deep = "red", Work = "#440154FF", Learn_Create = "#5DC863FF",
                  Sport_Motion = "#7F00FF", Meditation = QuantColors15[4], Braintable = "#0f4c81", Gefuehlsschule = "#FDE725FF", 
                  Social = "#FF7F50", Household = "#21908CFF", diary = "#9FDA3AFF")
+
+colorLevels <- names(colorValues)
 
 
 # - make a ggplot version of pal -
@@ -182,12 +184,13 @@ dayPlot <- function(PlotDF, plotDate, plotWidth = 10) {
         if(nrow(DFkDayPlot) != 0){
                 DFkDayPlot$Width <- DFkDayPlot$Width * plotWidth
                 DFkDayPlot$startPosition <- DFkDayPlot$startPosition * plotWidth 
+                DFkDayPlot$Color <- factor(DFkDayPlot$Color, levels = names(colorValues)) %>% fct_drop()
                 #DFkDayPlot$Color <- factor(DFkDayPlot$Color, levels = colorLevels, ordered = TRUE) # think I do that outside now
                 Tr <- ggplot(DFkDayPlot, aes(x = startPosition, y = Hours, label = shortName, fill = Color))
                 Tr <- Tr + 
                         geom_rect(mapping=aes(xmin=startPosition, xmax=startPosition+Width, ymin=Hours, ymax=Hours+Duration/60), alpha=1) + 
                         geom_text(vjust = 1, nudge_y = 0, hjust = -0.08, check_overlap = TRUE, col = "white", size = 3) + # https://stackoverflow.com/questions/17311917/ggplot2-the-unit-of-size
-                        scale_fill_manual("", values = colorValues) +
+                        scale_fill_manual("", values = colorValues[levels(DFkDayPlot$Color)]) +
                         scale_x_continuous(limits = c(0,plotWidth), breaks = c(), labels = c()) +
                         scale_y_reverse(limits = c(24, 0), breaks = seq(from = 22, to = 0, by = -2), expand = c(0,0)) +
                         facet_grid(facets = .~dayLabel, drop = FALSE)+
@@ -218,7 +221,7 @@ dayPlot <- function(PlotDF, plotDate, plotWidth = 10) {
 # function is called when DFkPlot contains no events
 
 dayPlotMock <- function(plotDate, plotWidth = 10) {
- 
+        
         DFkDayPlotMock <- data.frame(Wday = lubridate::wday(plotDate, label = TRUE), Week = strftime(plotDate, format = "%V", tz = "CET"), startPosition = 0,
                                      Hours = 0, shortName = "")
         DFkDayPlotMock$dayLabel <- paste(DFkDayPlotMock$Wday, " ", format.Date(plotDate, "%d"), ".", format.Date(plotDate, "%m"), ".", format.Date(plotDate, "%y"), ", W", DFkDayPlotMock$Week, sep = "")
@@ -266,6 +269,8 @@ weekPlot <- function(PlotDF, plotDate, plotWidth = 5) {
                 DFkWeekPlot$startPosition <- DFkWeekPlot$startPosition * plotWidth 
                 # DFkWeekPlot$Color <- factor(DFkWeekPlot$Color, levels = colorLevels, ordered = TRUE)
                 # add mock data.frame to mark the background of the plotDate day, see https://stackoverflow.com/questions/9847559/conditionally-change-panel-background-with-facet-grid
+                
+                DFkWeekPlot$Color <- factor(DFkWeekPlot$Color, levels = names(colorValues)) %>% fct_drop()
                 dayIndicatorDF <- data.frame(startPosition = 0, Hours = 0, shortName = "",
                                              weekLabel = DFkWeekPlot$weekLabel[1], dayLabel = paste(wday(plotDate, label = T), " ", format.Date(plotDate, "%d"), ".", format.Date(plotDate, "%m"), sep = ""))
                 dayIndicatorDF$dayLabel <- factor(dayIndicatorDF$dayLabel, levels = SurrounderDays, ordered = TRUE)
@@ -279,7 +284,7 @@ weekPlot <- function(PlotDF, plotDate, plotWidth = 5) {
                         # geom_text_repel(nudge_y = 0, col = "black", size = 3, segment.size = NA, box.padding = 0, xlim = c(0, Inf)) +
                         scale_x_continuous(limits = c(0,plotWidth), breaks = c(), labels = c()) +
                         scale_y_reverse(limits = c(24, 0), breaks = seq(from = 22, to = 0, by = -2), expand = c(0,0)) +
-                        scale_fill_manual("", values = colorValues) +
+                        scale_fill_manual("", values = colorValues[levels(DFkWeekPlot$Color)]) +
                         xlab("") +
                         ylab("") +
                         theme_bw() +
@@ -385,6 +390,8 @@ monthPlot <- function(PlotDF, plotDate, plotWidth = 5){
                                              Wday = wday(plotDate, label = T),
                                              weekLabel = paste("W ", monthWeeks[match(strftime(plotDate, format = "%V", tz = "CET"), monthWeeks)], sep = ""))
                 
+                DFkMonthPlot$Color <- factor(DFkMonthPlot$Color, levels = names(colorValues)) %>% fct_drop()
+                
                 Tr <- ggplot(DFkMonthPlot, aes(x = startPosition, y = Hours, label = shortName))
                 Tr <- Tr +
                         geom_rect(data = dayIndicatorDF, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, fill = "#999999", alpha = 0.3) +
@@ -393,7 +400,7 @@ monthPlot <- function(PlotDF, plotDate, plotWidth = 5){
                         # geom_text_repel(nudge_y = 0, col = "black", size = 2.5, segment.size = NA, box.padding = 0) +
                         scale_x_continuous(limits = c(0,plotWidth), breaks = c(), labels = c()) +
                         scale_y_reverse(limits = c(24, 0), breaks = c(24, 18, 12, 6), expand = c(0,0)) +
-                        scale_fill_manual("", values = colorValues) +
+                        scale_fill_manual("", values = colorValues[levels(DFkMonthPlot$Color)]) +
                         facet_grid(facets = weekLabel ~ Wday, drop = FALSE)+
                         #facet_wrap(weekLabel~Wday, ncol = 7, drop = FALSE)
                         xlab("") +
@@ -410,7 +417,7 @@ monthPlot <- function(PlotDF, plotDate, plotWidth = 5){
         } else {
                 
                 Tr <- monthPlotMock(plotDate, plotWidth = plotWidth)
-        
+                
         }
 }
 
@@ -427,7 +434,7 @@ monthPlotMock <- function(plotDate, plotWidth = 5){
         FirstDay <- which(strftime(MonthDays, format = "%V", tz = "CET") == FirstWeek)[1]
         LastDay <- which(strftime(MonthDays, format = "%V", tz = "CET") == LastWeek)[length(which(strftime(MonthDays, format = "%V", tz = "CET") == LastWeek))]
         MonthDays <- MonthDays[FirstDay:LastDay]
-
+        
         monthWeeksAll <- strftime(MonthDays, format = "%V", tz = "CET")
         MondayIndexes <- !duplicated(monthWeeksAll) 
         monthWeeks <- monthWeeksAll[MondayIndexes]

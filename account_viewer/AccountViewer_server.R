@@ -4,9 +4,9 @@ server <- function(input, output, session){
         
         # - generate reactive Values -
         rv <- reactiveValues(account_list = NULL, overviewTable = NULL, accountTable = NULL, infoText = NULL, Tra = NULL, plotHeight = 0,
-                             patternCategory = NULL, TrHB = NULL, plotHeightHB = 0, TrHB2 = NULL, plotHeightHB2 = 0,
+                             budget_categories = NULL, TrHB = NULL, plotHeightHB = 0, TrHB2 = NULL, plotHeightHB2 = 0, budget_table = NULL,
                              account_colors = c(Total = "#E69F00", IngDiba_Giro = "#117755", IngDiba_Extra = "#44AA88", IngDiba_Depot = "#99CCBB",
-                                                BasisBank_Loen = "#4477AA", Handelsbanken_Faelles = "#AA4477"))
+                                                BasisBank_Loen = "#4477AA", Handelsbanken_Faelles = "#AA4477", Handelsbanken_Loen = "#9455f4"))
         # --
         
         # - Get account_list dropbox -
@@ -38,7 +38,7 @@ server <- function(input, output, session){
         # --
         
         # - update account -
-        source(file.path(server_tab_path, "Tab06_UpdateAccounts.R"), local = TRUE)
+        # source(file.path(server_tab_path, "Tab06_UpdateAccounts.R"), local = TRUE) # obsolete after change of ui
         # --
         
         # - generate account table -
@@ -54,7 +54,11 @@ server <- function(input, output, session){
         # --
         
         # - make Haushaltsbuch plots -
-        source(file.path(server_tab_path, "Tab10_Haushaltsbuch.R"), local = TRUE)
+        # source(file.path(server_tab_path, "Tab10_Haushaltsbuch.R"), local = TRUE)
+        # --
+        
+        # - make budget overview -
+        source(file.path(server_tab_path, "Tab10_Budget.R"), local = TRUE)
         # --
         
 }

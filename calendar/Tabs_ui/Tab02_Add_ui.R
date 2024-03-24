@@ -35,7 +35,8 @@ Tab02 <- sidebarPanel(
                   ),
                   wellPanel(
                           checkboxInput(inputId = "search", label = "Entries containing.."),
-                          textInput(inputId = "wordsearch", label = "search entry", placeholder = "search entry")
+                          textInput(inputId = "wordsearch", label = "search entry", placeholder = "search entry"),
+                          checkboxInput(inputId = "diary_search", label = "only diary")
                           
                   ),
                   #tags$br(),

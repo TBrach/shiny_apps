@@ -1,0 +1,13 @@
+name: homework
+title: homework
+username: tbrach
+account: tbrach
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11302759
+bundleId: 8411359
+url: https://tbrach.shinyapps.io/homework/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: development/homework_tables.R|development/homework.rds

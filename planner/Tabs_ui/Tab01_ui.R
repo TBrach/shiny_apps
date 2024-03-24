@@ -10,7 +10,7 @@ Tab01 <- sidebarLayout(
                 textOutput(outputId = 'infoTextExtra3'),
                 wellPanel(
                         textInput(inputId = "eventName", label = "Event Name", value = ""),
-                        selectInput(inputId = "color", label = "Category", choices = c("Work", "Sport_Motion", "Social", "Meditation", "Learn_Create", "Braintable", "diary"), selected = "Work"),
+                        selectInput(inputId = "color", label = "Category", choices = colorLevels, selected = "Work"),
                         dateInput(inputId = "date", label = "Date"),
                         textOutput(outputId = 'dateStatus2'),
                         #textInput(inputId = "time", label = "Start Time", value = paste(strftime(now(), "%H", tz = "CET"), ":", strftime(now(), "%M", tz = "CET"), sep = ""), placeholder = "time in hh:mm"),

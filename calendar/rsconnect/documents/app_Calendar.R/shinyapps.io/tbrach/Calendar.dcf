@@ -5,9 +5,10 @@ account: tbrach
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3438608
-bundleId: 4049973
+bundleId: 6495440
 url: https://tbrach.shinyapps.io/calendar/
-when: 1609573109.0147
+when: 1668023289.78965
+lastSyncTime: 1668023289.78965
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: .Rapp.history|20180419_FaellesCorrection.R|20201012_FixPlotProblem.R|Faelles.rds|TestApp_EspeciallyTZtroubles.R
+ignoredFiles: .Rapp.history|20180419_FaellesCorrection.R|20201012_FixPlotProblem.R|20221106_fix_timeshift_plot_problem.R|Faelles.rds|Tabs_ui/.DS_Store

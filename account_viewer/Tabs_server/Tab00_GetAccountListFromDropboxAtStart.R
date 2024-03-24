@@ -1,3 +1,9 @@
+# - load budget_categories.rds file -
+if (file.exists("budget_categories.rds")) {
+        rv$budget_categories <- readRDS("budget_categories.rds")
+}
+# --
+
 # - load default planner from dropbox at start -
 suppressMessages(filesInfo <- drop_dir(path = 'apps/account_list'))
 filePaths <- filesInfo$path_display
@@ -13,4 +19,5 @@ if(Name %in% basename(filePaths)) {
 } else {
         rv$infoText = "Did not find an account list with this name in your Dropbox folder"
 }
+
 # --
