@@ -1,6 +1,7 @@
 # - Load all required packages -
 library(shiny)
 library(shinyTime)
+library(shinyFiles)
 #library(rdrop2)
 #library(gridExtra)
 #library(ggrepel)
@@ -11,7 +12,7 @@ library(officer)
 # --
 
 # - load functions -
-# source("calendarFunctions.R")
+source("app_labplan_functions.R")
 # --
 
 

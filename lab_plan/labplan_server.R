@@ -5,7 +5,11 @@ server <- function(input, output, session){
         
         
         # - generate reactive Values -
-        rv <- reactiveValues(default_lab_plans = NULL, choice_combi_df = NULL, lab_table = NULL, infoText = NULL)
+        rv <- reactiveValues(default_lab_plans = NULL, choice_combi_df = NULL, lab_table = NULL, dir_path = NULL, infoText = NULL)
+        # --
+        
+        # - set defaults for -
+        shinyDirChoose(input, 'dir', roots = c(home = '~', studies = "~/Boxcryptor/OneDrive-SharedLibraries-ClinicalMicrobiomics"))
         # --
         
         # - Get default labtables -
@@ -29,6 +33,9 @@ server <- function(input, output, session){
         source(file.path(server_tab_path, "part04_display_table_output.R"), local = TRUE)
         # --
         
+        # - The create word button -
+        source(file.path(server_tab_path, "part05_create_table_button.R"), local = TRUE)
+        # --
   
         
 }
