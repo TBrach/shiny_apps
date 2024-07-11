@@ -1,8 +1,7 @@
 # - source all the tabs -
 tabpath <- "./tabs_ui"
 source(file.path(tabpath, "html_styles_ui.R"))
-# source(file.path(tabpath, "part01_select_and_make_word_ui.R"))
-source(file.path(tabpath, "part01_select_and_make_word_shinyappsio_ui.R"))
+source(file.path(tabpath, "part01_sidebar_choices_ui.R"))
 source(file.path(tabpath, "part02_main_panel_ui.R"))
 # --
 

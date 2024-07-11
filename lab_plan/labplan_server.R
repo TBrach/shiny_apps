@@ -5,11 +5,12 @@ server <- function(input, output, session){
         
         
         # - generate reactive Values -
-        rv <- reactiveValues(default_lab_plans = NULL, choice_combi_df = NULL, lab_table = NULL, dir_path = NULL, infoText = NULL)
+        # rv <- reactiveValues(default_lab_plans = NULL, choice_combi_df = NULL, lab_table = NULL, dir_path = NULL, infoText = NULL)
+        rv <- reactiveValues(default_lab_plans = NULL, choice_combi_df = NULL, lab_table = NULL, lab_plan_word = NULL, infoText = NULL)
         # --
         
-        # - set defaults for -
-        shinyDirChoose(input, 'dir', roots = c(home = '~', studies = "~/Boxcryptor/OneDrive-SharedLibraries-ClinicalMicrobiomics"))
+        # - set defaults for (does not work on shinyapps.io) -
+        # shinyDirChoose(input, 'dir', roots = c(home = '~', studies = "~/Boxcryptor/OneDrive-SharedLibraries-ClinicalMicrobiomics"))
         # --
         
         # - Get default labtables -
@@ -21,7 +22,7 @@ server <- function(input, output, session){
         # --
         
         # - The create word button -
-        source(file.path(server_tab_path, "part02_create_word_button.R"), local = TRUE)
+        source(file.path(server_tab_path, "part02_create_word_button_shinyappsio.R"), local = TRUE)
         # --
         
         # - output infoText -
@@ -35,6 +36,10 @@ server <- function(input, output, session){
         
         # - The create word button -
         source(file.path(server_tab_path, "part05_create_table_button.R"), local = TRUE)
+        # --
+        
+        # - The create word button -
+        source(file.path(server_tab_path, "part06_save_word_button.R"), local = TRUE)
         # --
   
         
